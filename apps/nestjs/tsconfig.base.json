@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    // Base Options
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "importHelpers": false,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "moduleResolution": "bundler",
+    "noEmitOnError": false,
+    "skipLibCheck": true,
+    "target": "es2022",
+    "resolveJsonModule": true,
+
+    // Extras
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+
+    // Strictness
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "strict": true,
+
+    // Transpilation
+    "module": "ESNext",
+    "sourceMap": true,
+
+    // Build
+    "lib": ["es2022"],
+    "types": ["node"]
+  }
+}

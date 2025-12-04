@@ -1,0 +1,38 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "inputs": [
+    {
+      "id": "testNamePattern",
+      "type": "promptString",
+      "description": "Enter the test name pattern to run (leave empty to run all tests in the file)"
+    }
+  ],
+  "configurations": [
+    {
+      "name": "Attach",
+      "port": 9229,
+      "request": "attach",
+      "skipFiles": ["<node_internals>/**"],
+      "type": "node"
+    },
+    {
+      "name": "Debug Current Integration Test File (bff)",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "-c",
+        "cd ${workspaceFolder}/apps/bff-service && ./scripts/infisical-run.sh npx jest --config jest.config.cjs '${relativeFile}' -t '${input:testNamePattern}' --no-cache --coverage=false --runInBand"
+      ],
+      "cwd": "${workspaceFolder}/apps/bff-service",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "env": {
+        "NODE_ENV": "test"
+      }
+    }
+  ]
+}

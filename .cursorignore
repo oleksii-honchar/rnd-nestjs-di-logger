@@ -1,0 +1,65 @@
+# Add directories or file patterns to ignore during indexing (e.g. foo/ or *.csv)
+**/node_modules/
+# **/dist/
+**/coverage/
+**/logs/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+# dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+
+# Models (large files)
+*.pth
+*.pt
+*.onnx
+*.mlpackage
+
+# Environment variables
+.env
+.env.local
+
+# Docker
+.dockerignore
+
+# OS
+.DS_Store
+Thumbs.db 
+
+**/.history/
+**/.history

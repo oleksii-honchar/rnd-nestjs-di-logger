@@ -1,0 +1,27 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "noEmit": false,
+    "outDir": "./dist",
+    "declaration": true,
+    "declarationMap": true,
+    "paths": {
+      "@src/*": ["src/*"],
+      "package.json": ["./package.json"]
+    }
+  },
+  "include": ["./src/**/*"],
+  "exclude": [
+    "./node_modules",
+    "./dist",
+    "./docs",
+    "./coverage",
+    "./ops",
+    "./scripts",
+    "./**/*.test.ts",
+    "./**/*.test-utils.ts",
+    "./**/*.test-application.ts",
+    "./src/domains/customer/infrastructure/repositories/supabase-customer.repository/**"
+  ]
+}

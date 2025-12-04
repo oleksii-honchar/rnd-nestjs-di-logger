@@ -1,0 +1,9 @@
+{
+  "runtime": {
+    "environment": "development",
+    "port": 7001,
+    "host": "localhost",
+    "logLevel": "info",
+    "logLocalVerbose": false
+  }
+}

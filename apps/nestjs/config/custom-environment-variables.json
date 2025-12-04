@@ -1,0 +1,9 @@
+{
+  "runtime": {
+    "environment": "NODE_ENV",
+    "port": "PORT",
+    "host": "HOST",
+    "logLevel": "LOG_LEVEL",
+    "logLocalVerbose": "LOG_LOCAL_VERBOSE"
+  }
+}

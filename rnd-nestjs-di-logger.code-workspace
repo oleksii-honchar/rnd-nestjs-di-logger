@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+      "name": "root",
+			"path": "./"
+		},
+		{
+      "name": "nestjs",
+			"path": "./apps/nestjs"
+		},
+		{
+      "name": "nestjs-pino",
+			"path": "./apps/nestjs-pino"
+		}
+  ],
+  "settings": {}
+}
