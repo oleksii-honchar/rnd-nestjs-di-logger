@@ -4,9 +4,7 @@ import config from 'config';
 
 import { HealthModule } from './infrastructure/health/health.module';
 import { TestModule } from './infrastructure/test/test.module';
-import { LoggerModule } from 'nestjs-pino';
-import { pinoLoggerConfigFactory } from './infrastructure/logging/pino-logger-config.factory';
-import { LoggingModule } from './infrastructure/logging/logging.module';
+import { LoggerModule } from './infrastructure/logger/logger.module';
 
 const runtimeConfig = registerAs('runtime', () => config.get('runtime'));
 
@@ -55,12 +53,7 @@ class AppBootstrapService implements OnApplicationBootstrap {
       envFilePath: undefined,
       load: [runtimeConfig],
     }),
-    LoggerModule.forRootAsync({
-      useFactory: (configService: ConfigService) => pinoLoggerConfigFactory(configService),
-      inject: [ConfigService],
-    }),
-    // LoggerModule.forRoot(),
-    LoggingModule,
+    LoggerModule,
     HealthModule,
     TestModule,
   ],

@@ -1,8 +1,8 @@
-import { ConfigModule } from "@nestjs/config";
-import { Logger } from "@nestjs/common";
 import { Module } from "@nestjs/common";
 
 import { TestService } from "./test.service";
+import { InjectPinoLogger } from "nestjs-pino";
+import { BasePinoLogger } from "../logger/base-pino-logger";
 
 @Module({
   providers: [
@@ -10,9 +10,7 @@ import { TestService } from "./test.service";
   ],
 })
 export class TestModule {
-  private readonly logger = new Logger(TestModule.name);
-
-  constructor() {
-    this.logger.log('TestModule initialized');
+  constructor(@InjectPinoLogger(TestModule.name) private readonly logger: BasePinoLogger) {
+    this.logger.info('TestModule initialized');
   }
 }

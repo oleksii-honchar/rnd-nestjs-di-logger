@@ -1,5 +1,7 @@
 import { Controller, Get, Logger } from '@nestjs/common';
 import pkg from '../../../package.json';
+import { InjectPinoLogger } from 'nestjs-pino';
+import { BasePinoLogger } from '../logger/base-pino-logger';
 
 /**
  * Health check controller
@@ -7,10 +9,8 @@ import pkg from '../../../package.json';
  */
 @Controller()
 export class HealthController {
-  private readonly logger = new Logger(HealthController.name);
-
-  constructor() {
-    this.logger.log('HealthController initialized');
+  constructor(@InjectPinoLogger(HealthController.name) private readonly logger: BasePinoLogger) {
+    this.logger.info('HealthController initialized');
   }
 
   @Get('health')

@@ -2,10 +2,9 @@ import 'reflect-metadata'; // Required for NestJS decorator metadata
 
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
-import { Logger } from 'nestjs-pino';
 
 import { AppModule } from './app.module';
-import { BasePinoLogger } from './infrastructure/logging/base-pino-logger';
+import { BasePinoLogger } from './infrastructure/logger/base-pino-logger';
 
 /**
  * Creates and configures the NestJS application
@@ -16,8 +15,9 @@ export async function createNestApi() {
   // bufferLogs: true ensures logs are buffered until the logger is ready
   // This is required for proper logger substitution
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
-
-  app.useLogger(app.get(Logger));
+  const logger = app.get(BasePinoLogger);
+  logger.setContext('Main');
+  app.useLogger(logger);
   app.flushLogs();
   app.enableCors();
   app.enableShutdownHooks();
@@ -36,11 +36,10 @@ async function bootstrap() {
     const port = configService.get<number>('runtime.port') ?? NaN;
     const host = configService.get<string>('runtime.host') ?? '0.0.0.0';
 
-    const logger = app.get(Logger);
-    // (logger as unknown as BasePinoLogger).setPrefix('Main');
+    const logger = app.get(BasePinoLogger);
 
     await app.listen(port, host);
-    logger.log(`[Main] Application is running on port ${port}`);
+    logger.log(`Application is running on port ${port}`);
   } catch (error) {
     console.error('Failed to start application:', error);
     console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');

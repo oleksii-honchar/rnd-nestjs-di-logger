@@ -1,28 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Injectable, LoggerService, Scope, Logger } from '@nestjs/common';
+import { Injectable, LoggerService, Scope, Logger, Inject } from '@nestjs/common';
 import { storage, Store } from 'nestjs-pino/storage';
-import { PinoLogger } from 'nestjs-pino';
+import { PARAMS_PROVIDER_TOKEN, Logger as Logger1, PinoLogger } from 'nestjs-pino';
+import type { Params } from 'nestjs-pino';
 
-/**
- * BasePinoLogger implements LoggerService using PinoLogger
- * Uses TRANSIENT scope so each service gets its own logger instance with its own context
- *
- * This is a complete implementation that wraps PinoLogger and provides all logger functionality
- */
-@Injectable({ scope: Scope.TRANSIENT })
-export class BasePinoLogger implements LoggerService {
+@Injectable()
+export class BasePinoLogger extends PinoLogger {
   private prefix: string | undefined;
-  private readonly pinoLogger = new Logger(BasePinoLogger.name) as unknown as PinoLogger;
+  private params: Params;
 
-  constructor({ logger }: { logger: PinoLogger }) {
-    this.pinoLogger = logger;
-  }
-  /**
-   * Set the context for this logger instance
-   * Delegates to PinoLogger's built-in setContext method
-   */
-  setContext(context: string): void {
-    this.pinoLogger.setContext(context);
+  constructor(
+    @Inject(PARAMS_PROVIDER_TOKEN) params: Params,
+  ) {
+    super(params);
+    this.setContext(BasePinoLogger.name);
+    this.params = params;
   }
 
   /**
@@ -68,78 +60,64 @@ export class BasePinoLogger implements LoggerService {
   addMetadata(metadata: Record<string, unknown>): void {
     // Ensure storage is available for request-scoped metadata
     if (!storage.getStore()) {
-      storage.enterWith(new Store(this.pinoLogger.logger));
+      storage.enterWith(new Store(super.logger));
     }
-    this.pinoLogger.assign(metadata);
+    super.assign(metadata);
   }
 
   log(message: any, ...optionalParams: any[]): void {
     this.info(message, ...optionalParams);
   }
 
-  verbose(message: any, ...optionalParams: any[]): void {
-    this.trace(message, ...optionalParams);
-  }
-
-  trace(message: any, ...optionalParams: any[]): void {
+  override trace(message: any, ...optionalParams: any[]): void {
     const formatted = this.formatMessage(message, ...optionalParams);
-    this.pinoLogger.trace(formatted[0], ...formatted.slice(1));
+    super.trace(formatted[0], ...formatted.slice(1));
   }
 
-  debug(message: any, ...optionalParams: any[]): void {
+  override debug(message: any, ...optionalParams: any[]): void {
     const formatted = this.formatMessage(message, ...optionalParams);
-    this.pinoLogger.debug(formatted[0], ...formatted.slice(1));
+    super.debug(formatted[0], ...formatted.slice(1));
   }
 
-  info(message: any, ...optionalParams: any[]): void {
+  override info(message: any, ...optionalParams: any[]): void {
     const formatted = this.formatMessage(message, ...optionalParams);
-    this.pinoLogger.info(formatted[0], ...formatted.slice(1));
+    super.info(formatted[0], ...formatted.slice(1));
   }
 
-  warn(message: any, ...optionalParams: any[]): void {
+  override warn(message: any, ...optionalParams: any[]): void {
     const formatted = this.formatMessage(message, ...optionalParams);
-    this.pinoLogger.warn(formatted[0], ...formatted.slice(1));
+    super.warn(formatted[0], ...formatted.slice(1));
   }
 
-  error(message: any, ...optionalParams: any[]): void {
+  override error(message: any, ...optionalParams: any[]): void {
     const formatted = this.formatMessage(message, ...optionalParams);
-    this.pinoLogger.error(formatted[0], ...formatted.slice(1));
+    super.error(formatted[0], ...formatted.slice(1));
   }
 
-  fatal(message: any, ...optionalParams: any[]): void {
+  override fatal(message: any, ...optionalParams: any[]): void {
     const formatted = this.formatMessage(message, ...optionalParams);
-    this.pinoLogger.fatal(formatted[0], ...formatted.slice(1));
+    super.fatal(formatted[0], ...formatted.slice(1));
   }
 
-  // Delegate other Logger methods to the underlying pino logger
-  child(bindings: Record<string, unknown>): BasePinoLogger {
-    const childLogger = this.pinoLogger.logger.child(bindings);
-    return new BasePinoLogger({ logger: childLogger as unknown as PinoLogger });
-  }
-
-  bindings(): Record<string, unknown> {
-    return this.pinoLogger.logger.bindings();
-  }
-
-  flush(): void {
-    this.pinoLogger.logger.flush();
+  child(): BasePinoLogger {
+    return new BasePinoLogger(this.params);
   }
 
   // Delegate Logger properties
   get level(): string {
-    return this.pinoLogger.logger.level as string;
+    return super.logger.level as string;
   }
 
   set level(value: string) {
-    this.pinoLogger.logger.level = value;
+    super.logger.level = value;
   }
 
   get levelVal(): number {
-    return this.pinoLogger.logger.levelVal;
+    return super.logger.levelVal;
   }
 
   get useOnlyCustomLevels(): boolean {
-    return this.pinoLogger.logger.useOnlyCustomLevels;
+    return super.logger.useOnlyCustomLevels;
   }
 }
 
