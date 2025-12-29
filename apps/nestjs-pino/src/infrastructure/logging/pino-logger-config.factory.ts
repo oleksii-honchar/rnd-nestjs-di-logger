@@ -1,25 +1,25 @@
 import { ConfigService } from '@nestjs/config';
 import type { Request, Response } from 'express';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import { Params } from 'nestjs-pino';
 import { Options } from 'pino-http';
 import pkg from '../../../package.json';
 
+// Get __dirname equivalent for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 /**
  * Factory function for Pino logger configuration
  * Used with LoggerModule.forRootAsync() to access ConfigService
- * Falls back to process.env if ConfigService is not provided
  */
-export const pinoLoggerConfigFactory = (configService?: ConfigService): Params => {
-  console.log('[pinoLoggerConfigFactory] Factory called');
-  console.log('[pinoLoggerConfigFactory] ConfigService available:', !!configService);
-
+export const pinoLoggerConfigFactory = (configService: ConfigService): Params => {
   const serviceName = pkg.name;
-  const environment = configService?.get<string>('runtime.environment') || 'development';
+  const environment = configService.get<string>('runtime.environment') || 'development';
   const isProduction = environment === 'production';
-  const logLevel = configService?.get<string>('runtime.logLevel') || 'info';
-  const isLocalLogVerbose = configService?.get<string>('runtime.logLocalVerbose')?.toLowerCase() === 'true' || false;
-
-  console.log('[pinoLoggerConfigFactory] Config completed - environment:', environment, 'logLevel:', logLevel);
+  const logLevel = configService.get<string>('runtime.logLevel') || 'info';
+  const isLocalLogVerbose = configService.get<string>('runtime.logLocalVerbose')?.toLowerCase() === 'true' || false;
 
   const pinoHttpOptions: {
     level: string;
@@ -31,10 +31,7 @@ export const pinoLoggerConfigFactory = (configService?: ConfigService): Params =
   } = {
     level: logLevel,
     messageKey: 'message',
-    // Custom timestamp formatter to create 'timestamp' field (matches payfit/be)
     timestamp: () => `,"timestamp":"${new Date(Date.now()).toISOString()}"`,
-    // Use 'base' instead of 'name' - this sets base properties included in all logs
-    // This matches payfit/be configuration and prevents [undefined] in bracket format
     base: {
       environment,
       service: serviceName,
@@ -63,32 +60,26 @@ export const pinoLoggerConfigFactory = (configService?: ConfigService): Params =
       colorize: true,
       messageKey: 'message',
       translateTime: 'yyyy-mm-dd HH:MM:ss', // Format timestamp (matches payfit/be)
-      singleLine: false, // Allow multi-line output for better readability
+      singleLine: false,
       ignore: 'pid,hostname',
     };
 
-    // When not verbose, show minimal metadata (level, message, timestamp)
-    // 'timestamp' is used (not 'time') - matches payfit/be configuration
-    // 'message' is used because messageKey is set to 'message'
-    // This matches payfit/be configuration
-    // When verbose, show all fields
     if (!isLocalLogVerbose) {
       pinoPrettyOptions.include = 'level,name,message,timestamp';
     }
 
     pinoHttpOptions.transport = {
-      target: 'pino-pretty',
+      // Use custom transport wrapper to support messageFormat function
+      target: join(__dirname, 'pino-pretty-transport.js'),
       options: pinoPrettyOptions,
     };
   }
 
   const baseConfig: Params = {
-    // Type assertion needed because TypeScript can't infer the exact Options type
-    // but we know the structure is correct for nestjs-pino
     pinoHttp: pinoHttpOptions as unknown as Options,
   };
 
-  console.log('[pinoLoggerConfigFactory] Config factory completed successfully');
+  console.log('[pinoLoggerConfigFactory] Config factory executed successfully');
   return baseConfig;
 };
 

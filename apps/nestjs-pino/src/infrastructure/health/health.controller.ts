@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Logger } from '@nestjs/common';
 import pkg from '../../../package.json';
 
 /**
@@ -7,6 +7,12 @@ import pkg from '../../../package.json';
  */
 @Controller()
 export class HealthController {
+  private readonly logger = new Logger(HealthController.name);
+
+  constructor() {
+    this.logger.log('HealthController initialized');
+  }
+
   @Get('health')
   getHealth() {
     const response = {

@@ -1,7 +1,6 @@
 .git
 .editorconfig
 .DS_Store
-.npmrc
 .history
 .turbo
 

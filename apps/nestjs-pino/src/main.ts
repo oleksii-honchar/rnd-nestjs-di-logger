@@ -1,10 +1,11 @@
 import 'reflect-metadata'; // Required for NestJS decorator metadata
 
-import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { Logger } from 'nestjs-pino';
 
 import { AppModule } from './app.module';
+import { BasePinoLogger } from './infrastructure/logging/base-pino-logger';
 
 /**
  * Creates and configures the NestJS application
@@ -12,8 +13,12 @@ import { AppModule } from './app.module';
  * @returns Configured NestJS application instance
  */
 export async function createNestApi() {
-  const app = await NestFactory.create(AppModule);
+  // bufferLogs: true ensures logs are buffered until the logger is ready
+  // This is required for proper logger substitution
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
+  app.useLogger(app.get(Logger));
+  app.flushLogs();
   app.enableCors();
   app.enableShutdownHooks();
 
@@ -31,7 +36,8 @@ async function bootstrap() {
     const port = configService.get<number>('runtime.port') ?? NaN;
     const host = configService.get<string>('runtime.host') ?? '0.0.0.0';
 
-    const logger = new Logger('Main');
+    const logger = app.get(Logger);
+    // (logger as unknown as BasePinoLogger).setPrefix('Main');
 
     await app.listen(port, host);
     logger.log(`[Main] Application is running on port ${port}`);

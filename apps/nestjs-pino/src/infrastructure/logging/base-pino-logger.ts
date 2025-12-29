@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Injectable, LoggerService, Scope } from '@nestjs/common';
-import { PinoLogger } from 'nestjs-pino';
+import { Injectable, LoggerService, Scope, Logger } from '@nestjs/common';
 import { storage, Store } from 'nestjs-pino/storage';
+import { PinoLogger } from 'nestjs-pino';
 
 /**
  * BasePinoLogger implements LoggerService using PinoLogger
@@ -12,13 +12,11 @@ import { storage, Store } from 'nestjs-pino/storage';
 @Injectable({ scope: Scope.TRANSIENT })
 export class BasePinoLogger implements LoggerService {
   private prefix: string | undefined;
+  private readonly pinoLogger = new Logger(BasePinoLogger.name) as unknown as PinoLogger;
 
-  constructor(private readonly pinoLogger: PinoLogger) {
-    if (!this.pinoLogger) {
-      throw new Error('PinoLogger is required but was not injected. Make sure LoggerModule from nestjs-pino is imported before LoggingModule.');
-    }
+  constructor({ logger }: { logger: PinoLogger }) {
+    this.pinoLogger = logger;
   }
-
   /**
    * Set the context for this logger instance
    * Delegates to PinoLogger's built-in setContext method
@@ -116,7 +114,7 @@ export class BasePinoLogger implements LoggerService {
   // Delegate other Logger methods to the underlying pino logger
   child(bindings: Record<string, unknown>): BasePinoLogger {
     const childLogger = this.pinoLogger.logger.child(bindings);
-    return new BasePinoLogger({ logger: childLogger } as PinoLogger);
+    return new BasePinoLogger({ logger: childLogger as unknown as PinoLogger });
   }
 
   bindings(): Record<string, unknown> {
